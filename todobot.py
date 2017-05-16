@@ -2,10 +2,14 @@ import json
 import requests
 import time
 import urllib
+import traceback
 from dbhelper import DBHelper
+from pyowm import OWM
 
 TOKEN = "394214725:AAGDtwiG3zLOjP8TELNT_bWlFL3gKZi72cg"
 URL = "https://api.telegram.org/bot{}/".format(TOKEN)
+OWMKEY = "fb45d1450d0dcb39d4902e9cb1e48906"
+LOCATION = "http://freegeoip.net/json"
 db = DBHelper()
 
 def get_url(url):
@@ -56,6 +60,10 @@ def handle_updates(updates):
     for update in updates["result"]:
         text = update["message"]["text"]
         chat = update["message"]["chat"]["id"]
+        r = requests.get(LOCATION)
+        location = json.loads(r.text)
+        latitude = location['latitude']
+        longitude = location['longitude']
         items = db.get_items(chat)
         if text == "/done":
             keyboard = build_keyboard(items)
@@ -67,6 +75,14 @@ def handle_updates(updates):
             send_message("Select an item to delete", chat, keyboard)
         elif text == "/start":
             send_message("Welcome to your personal To Do List. Send and text to me and I'll store it as an item. Send /done to remove items", chat)
+        elif text == "location":
+            owm = OWM(OWMKEY)
+            l = owm.weather_at_coords(latitude, longitude)
+            w = l.get_weather()
+            place = l.get_location()
+            actual_place = str(place.get_name())
+            temp = str(w.get_temperature('fahrenheit').get('temp'))
+            send_message("Place: {}, Temp: {}".format(actual_place, temp), chat)
         elif text.startswith("/"):
             continue
         else:
