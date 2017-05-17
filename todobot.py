@@ -74,8 +74,8 @@ def handle_updates(updates):
             keyboard = build_keyboard(items)
             send_message("Select an item to delete", chat, keyboard)
         elif text == "/start":
-            send_message("Welcome to your personal To Do List. Send and text to me and I'll store it as an item. Send /done to remove items", chat)
-        elif text == "location":
+            send_message("Welcome to your personal To Do List. Send and text to me and I'll store it as an item. Send /done to remove items. Type 'weather' to get weather", chat)
+        elif text == "weather":
             owm = OWM(OWMKEY)
             l = owm.weather_at_coords(latitude, longitude)
             w = l.get_weather()
